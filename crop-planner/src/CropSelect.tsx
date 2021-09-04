@@ -1,3 +1,4 @@
+import { ReactElement } from 'react'
 import Select from 'react-select'
 
 import { Crop } from './types'
@@ -8,7 +9,7 @@ type Props = {
   onChange: (crop: Crop | null) => void,
 }
 
-const CropSelect = (props: Props) => (
+const CropSelect = (props: Props): ReactElement => (
   <Select
     className="react-select react-select--table"
     classNamePrefix="react-select"
@@ -18,4 +19,4 @@ const CropSelect = (props: Props) => (
   />
 )
 
-export default CropSelect
+export default CropSelect;

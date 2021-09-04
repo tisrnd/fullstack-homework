@@ -54,6 +54,12 @@
 .table__cell--right {
   align-items: flex-end;
   text-align: right;
+  &.light-green {
+    background-color: $light-green;
+  }
+  &.light-red {
+    background-color: $light-red;
+  }
 }
 
 .table__cell--with-select {

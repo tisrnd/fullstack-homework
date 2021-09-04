@@ -1,4 +1,4 @@
-import { PureComponent } from 'react'
+import { PureComponent, ReactElement } from 'react'
 import { sortBy } from 'lodash'
 
 import CropSelect from './CropSelect'
@@ -10,7 +10,7 @@ type Props = {}
 
 type State = {
   allCrops: Array<Crop>,
-  fields: Array<Field>
+  fields: Array<Field>,
 }
 
 export default class Table extends PureComponent<Props, State> {
@@ -29,7 +29,12 @@ export default class Table extends PureComponent<Props, State> {
       allCrops: await fetchCrops(),
     })
 
-  render = () =>
+  updateHumusBalances = async () =>
+    this.setState({
+      fields: await fetchFields(this.state.fields)
+    })
+    
+  render = (): ReactElement =>
     <div className="table">
       <div className="table__row table__row--header">
         <div className="table__cell">Field name</div>
@@ -45,18 +50,18 @@ export default class Table extends PureComponent<Props, State> {
       {sortBy(this.state.fields, field => field.name).map(field => this.renderFieldRow(field))}
     </div>
 
-  renderFieldRow = (field: Field) =>
+  renderFieldRow = (field: Field): ReactElement =>
     <div className="table__row" key={field.id}>
       <div className="table__cell">{field.name}</div>
       <div className="table__cell table__cell--right">{field.area}</div>
 
-      {sortBy(field.crops, crop => crop.year).map(seasonalCrop => this.renderCropCell(field, seasonalCrop))}
+      {sortBy(field.crops, crop => crop.year).map((seasonalCrop, index) => this.renderCropCell(field, seasonalCrop, index))}
 
-      <div className="table__cell table__cell--right">--</div>
+      <div className={"table__cell table__cell--right " + (field.humus > 0 ? "light-green" : "light-red")}>{field.humus}</div>
     </div>
 
-  renderCropCell = (field: Field, seasonalCrop: SeasonalCrop) =>
-    <div className="table__cell table__cell--center table__cell--with-select">
+  renderCropCell = (field: Field, seasonalCrop: SeasonalCrop, index: number): ReactElement =>
+    <div className="table__cell table__cell--center table__cell--with-select" key={index}>
       <CropSelect
         selectedCrop={seasonalCrop.crop}
         allCrops={this.state.allCrops}
@@ -64,8 +69,10 @@ export default class Table extends PureComponent<Props, State> {
       />
     </div>
 
-  changeFieldCrop = (newCrop: Crop | null, fieldId: number, cropYear: number) =>
+  changeFieldCrop = (newCrop: Crop | null, fieldId: number, cropYear: number): void => {
     this.setState(
       buildNewFieldsState(this.state.fields, newCrop, fieldId, cropYear),
-    )
+      () => this.updateHumusBalances()
+    );
+  }
 }
